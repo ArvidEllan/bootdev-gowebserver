@@ -4,38 +4,40 @@ import (
 	"log"
 	"net/http"
 )
-func main()  {
-	const filepathRoot = "."
+
+func main() {
 	const port = "8080"
 
-
+	// Serve static files from the root directory
 	fs := http.FileServer(http.Dir("."))
-	http.Handle("/",http.StripPrefix("/",fs))
-	http.Handle("/assets/",http.StripPrefix("/assets",http.FileServer(http.Dir("assets"))))
+	http.Handle("/", http.StripPrefix("/", fs))
 
-    handler := middlewareCors(http.DefaultServeMux)
+	// Serve static files from the "assets" directory
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
-	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir(filepathRoot)))
-	corsMux := middlewareCors(mux)
+	// Apply CORS middleware
+	handler := middlewareCors(http.DefaultServeMux)
 
 	srv := &http.Server{
-		Addr: ":" + port,
-		Handler: corsMux,
+		Addr:    ":" + port,
+		Handler: handler,
 	}
-	log.Printf("Serving files from %s on port : %s\n" ,filepathRoot, port)
+
+	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())
 }
-func middlewareCors(next http.Handler) http.Handler{
-	return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request)  {
-		w.Header().Set("Access-Control-Allow-Origins", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE")
+
+func middlewareCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
+
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-		next.ServeHTTP(w,r)
-		
+
+		next.ServeHTTP(w, r)
 	})
 }
