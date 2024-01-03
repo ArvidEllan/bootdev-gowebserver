@@ -8,6 +8,13 @@ func main()  {
 	const filepathRoot = "."
 	const port = "8080"
 
+
+	fs := http.FileServer(http.Dir("."))
+	http.Handle("/",http.StripPrefix("/",fs))
+	http.Handle("/assets/",http.StripPrefix("/assets",http.FileServer(http.Dir("assets"))))
+
+    handler := middlewareCors(http.DefaultServeMux)
+
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir(filepathRoot)))
 	corsMux := middlewareCors(mux)
