@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -24,10 +23,10 @@ func main()  {
     
 
 	mux := http.NewServeMux()
-	mux.Handle("/app/",apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
-	mux.HandleFunc("/reset", apiCfg.handlerReset)
+	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
 	mux.HandleFunc("/healthz", handlerReadiness)
 	mux.HandleFunc("/metrics", apiCfg.handlerMetrics)
+	mux.HandleFunc("/reset", apiCfg.handlerReset)
 
 	mux.Handle("/", http.FileServer(http.Dir(filepathRoot)))
 	corsMux := middlewareCors(mux)
@@ -40,7 +39,7 @@ func main()  {
 	log.Fatal(srv.ListenAndServe())
 }
 
-func (cfg *apiConfig) middlewareMetricsInc( next http.Handler) http.Handler {
+func (cfg *apiConfig) handlerMetrics( next http.Handler) http.Handler {
 	return http.HandlerFunc(func (w http.ResponseWriter, r * http.Request){
 		cfg.fileserverHits++
 		next.ServeHTTP(w,r)
