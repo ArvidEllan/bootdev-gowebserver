@@ -1,3 +1,3 @@
-# bootdev-gowebserver
+# Building a golang WebServer from scratch as practice on bootdev 
 
-#practise project on building a go webserver from scratch 
+#golang webserver framework practise 
